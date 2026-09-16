@@ -1,0 +1,109 @@
+const products = [
+  {
+    name: "NISHI",
+    category: "Woody",
+    price: 2499,
+    description: "A deep fragrance inspired by quiet evenings.",
+    image: "/images/products/nishi.jpg",
+  },
+
+  {
+    name: "AAROH",
+    category: "Fresh",
+    price: 2299,
+    description: "A fresh fragrance inspired by new beginnings.",
+    image: "/images/products/aaroh.jpg",
+  },
+
+  {
+    name: "SAANJH",
+    category: "Eau de Parfum",
+    price: 3499,
+    description:
+      "A warm fragrance inspired by the quiet beauty of dusk.",
+    image: "/images/products/saanjh.jpg",
+  },
+
+  {
+    name: "VAAS",
+    category: "Oriental",
+    price: 2799,
+    description:
+      "A rich fragrance with an unforgettable presence.",
+    image: "/images/products/vaas.jpg",
+  },
+
+  {
+    name: "MEGH",
+    category: "Fresh",
+    price: 2399,
+    description:
+      "A crisp fragrance carrying the freshness of rain-soaked earth.",
+    image: "/images/products/megh.jpg",
+  },
+
+  {
+    name: "RAAHI",
+    category: "Woody",
+    price: 2899,
+    description:
+      "A warm woody fragrance for journeys that stay with you.",
+    image: "/images/products/raahi.jpg",
+  },
+
+  {
+    name: "KESAR",
+    category: "Oriental",
+    price: 3199,
+    description:
+      "A refined fragrance with warm spice and subtle depth.",
+    image: "/images/products/kesar.jpg",
+  },
+
+  {
+    name: "NEER",
+    category: "Aquatic",
+    price: 2199,
+    description:
+      "A clean and serene fragrance inspired by still waters.",
+    image: "/images/products/neer.jpg",
+  },
+
+  {
+    name: "AABHA",
+    category: "Floral",
+    price: 2699,
+    description:
+      "A luminous floral fragrance with a soft modern character.",
+    image: "/images/products/aabha.jpg",
+  },
+
+  {
+    name: "RIHAN",
+    category: "Woody",
+    price: 2999,
+    description:
+      "A sophisticated blend of woods created for quiet confidence.",
+    image: "/images/products/rihan.jpg",
+  },
+
+  {
+    name: "TARA",
+    category: "Floral",
+    price: 2599,
+    description:
+      "A delicate floral fragrance with a graceful, contemporary finish.",
+    image: "/images/products/tara.jpg",
+  },
+
+  {
+    name: "VANYA",
+    category: "Oriental",
+    price: 3299,
+    description:
+      "A rich and elegant fragrance with a warm lingering trail.",
+    image: "/images/products/vanya.jpg",
+  },
+];
+
+module.exports = products;
