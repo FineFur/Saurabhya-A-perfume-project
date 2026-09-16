@@ -1,87 +1,94 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
 
 import CartContext from "../../../context/CartContext";
 
 function ProductCard({ product }) {
-  const [quantity, setQuantity] = useState(1);
-
   const { addToCart } = useContext(CartContext);
 
+  const [quantity, setQuantity] = useState(1);
+
+  function increaseQuantity() {
+    setQuantity((current) => current + 1);
+  }
+
+  function decreaseQuantity() {
+    setQuantity((current) => Math.max(1, current - 1));
+  }
+
+  function handleAddToCart() {
+    addToCart(product, quantity);
+  }
+
   return (
-    <article className="group flex h-full flex-col">
-      {/* Image */}
-      <Link to={`/product/${product._id}`} className="block">
+    <div>
+      {/* PRODUCT IMAGE */}
+      <Link to={`/product/${product._id}`}>
         <div className="aspect-[4/3] overflow-hidden bg-stone-100">
           <img
             src={product.image}
             alt={product.name}
-            className="h-full w-full object-contain transition duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition duration-500 hover:scale-105"
           />
         </div>
       </Link>
 
-      {/* Information */}
-      <div className="flex flex-1 flex-col pt-5">
-        <p className="text-xs uppercase tracking-[0.2em] text-stone-600">
-          {product.category}
-        </p>
+      {/* CATEGORY */}
+      <p className="mt-6 text-xs uppercase tracking-[0.25em] text-stone-500">
+        {product.category}
+      </p>
 
-        <h3 className="mt-2 font-serif text-2xl text-stone-900">
-          <Link to={`/product/${product.id}`}>{product.name}</Link>
-        </h3>
+      {/* NAME */}
+      <h2 className="mt-3 font-serif text-3xl text-stone-900">
+        {product.name}
+      </h2>
 
-        <p className="mt-2 min-h-[3rem] text-sm leading-6 text-stone-700">
-          {product.description}
-        </p>
+      {/* DESCRIPTION */}
+      <p className="mt-4 min-h-[48px] text-base leading-7 text-stone-700">
+        {product.description}
+      </p>
 
-        <p className="mt-4 text-base text-stone-900">
-          ₹{product.price.toLocaleString("en-IN")}
-        </p>
+      {/* PRICE */}
+      <p className="mt-6 text-base text-stone-900">
+        ₹{product.price.toLocaleString("en-IN")}
+      </p>
 
-        {/* View Details */}
-        <Link
-          to={`/product/${product.id}`}
-          className="mt-4 inline-block text-sm uppercase tracking-wider underline underline-offset-4"
-        >
-          View Details
-        </Link>
+      {/* VIEW DETAILS */}
+      <Link
+        to={`/product/${product._id}`}
+        className="mt-6 inline-block border-b border-stone-900 pb-1 text-sm uppercase tracking-wide text-stone-900"
+      >
+        View Details
+      </Link>
 
-        {/* Quantity */}
-        <div className="mt-4 flex items-center gap-4">
-          {/* Decrease */}
-          <button
-            onClick={() =>
-              setQuantity((currentQuantity) => Math.max(1, currentQuantity - 1))
-            }
-            className="h-8 w-8 border border-stone-300"
-          >
-            -
-          </button>
-
-          {/* Quantity */}
-          <span className="min-w-5 text-center">{quantity}</span>
-
-          {/* Increase */}
-          <button
-            onClick={() =>
-              setQuantity((currentQuantity) => currentQuantity + 1)
-            }
-            className="h-8 w-8 border border-stone-300"
-          >
-            +
-          </button>
-        </div>
-
-        {/* Add to Cart */}
+      {/* QUANTITY */}
+      <div className="mt-5 flex items-center gap-4">
         <button
-          onClick={() => addToCart(product, quantity)}
-          className="mt-auto w-full bg-stone-900 py-3 text-sm uppercase tracking-wider text-white transition hover:bg-stone-700"
+          onClick={decreaseQuantity}
+          className="flex h-10 w-10 items-center justify-center border border-stone-300 text-stone-900 transition hover:bg-stone-100"
         >
-          Add to Cart
+          -
+        </button>
+
+        <span className="w-4 text-center text-sm">{quantity}</span>
+
+        <button
+          onClick={increaseQuantity}
+          className="flex h-10 w-10 items-center justify-center border border-stone-300 text-stone-900 transition hover:bg-stone-100"
+        >
+          +
         </button>
       </div>
-    </article>
+
+      {/* ADD TO CART */}
+      <button
+        onClick={handleAddToCart}
+        className="mt-0 w-full bg-stone-900 py-4 text-sm uppercase tracking-wide text-white transition hover:bg-stone-800"
+      >
+        Add to Cart
+      </button>
+    </div>
   );
 }
 
