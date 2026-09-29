@@ -192,7 +192,13 @@ PDF receipts are generated using **jsPDF**.
     RECEIPT          │
                     ▼
              DOWNLOAD RECEIPT
-📁 Project Structure
+```
+
+---
+
+## 📁 Project Structure
+
+```text
 SAURABHYA/
 │
 ├── public/
@@ -262,74 +268,117 @@ SAURABHYA/
 ├── package-lock.json
 ├── README.md
 └── vite.config.js
-⚙️ Requirements
+```
+
+---
+
+## ⚙️ Requirements
 
 Before running the project, install:
 
-Node.js
-npm
-MongoDB
-Git
-🚀 Installation & Setup
-1. Clone the repository
+- Node.js
+- npm
+- MongoDB
+- Git
+
+---
+
+## 🚀 Installation & Setup
+
+### 1. Clone the repository
+
+```bash
 git clone https://github.com/FineFur/Saurabhya-A-perfume-project.git
+```
 
 Navigate into the project:
 
+```bash
 cd Saurabhya-A-perfume-project
-2. Install frontend dependencies
+```
+
+### 2. Install frontend dependencies
 
 From the project root:
 
+```bash
 npm install
-3. Install backend dependencies
+```
+
+### 3. Install backend dependencies
+
+```bash
 cd server
 npm install
-4. Configure environment variables
+```
+
+### 4. Configure environment variables
 
 Create a file:
 
+```text
 server/.env
+```
 
 Add:
 
+```env
 JWT_SECRET=your_secret_key
+```
 
-Do not commit the .env file to GitHub.
+Do not commit the `.env` file to GitHub.
 
-5. Start MongoDB
+### 5. Start MongoDB
 
 The project uses a local MongoDB database:
 
+```text
 mongodb://127.0.0.1:27017/saurabhya
-6. Start the backend
+```
 
-From the server directory:
+### 6. Start the backend
 
+From the `server` directory:
+
+```bash
 node server.js
+```
 
 The backend will run on:
 
+```text
 http://localhost:5000
-7. Start the frontend
+```
+
+### 7. Start the frontend
 
 Open another terminal and return to the project root:
 
+```bash
 cd ..
+```
 
 Run:
 
+```bash
 npm run dev
+```
 
 The frontend will usually run on:
 
+```text
 http://localhost:5173
-🔐 Authentication
+```
+
+---
+
+## 🔐 Authentication
 
 SAURABHYA uses JWT-based authentication.
 
 The authentication workflow is:
 
+```text
 Register
    ↓
 Password hashed using bcryptjs
@@ -343,86 +392,100 @@ JWT generated
 Token stored on client
    ↓
 Protected API requests
+```
 
 Protected features include:
 
-Account
-Checkout
-My Orders
-Order creation
-🗄️ Database
+- Account
+- Checkout
+- My Orders
+- Order creation
+
+---
+
+## 🗄️ Database
 
 MongoDB is used as the application's database.
 
 The main collections are:
 
-Users
+### Users
 
 Stores:
 
-Name
-Email
-Password hash
-Phone
-Address
-City
-State
-Pincode
-Products
+- Name
+- Email
+- Password hash
+- Phone
+- Address
+- City
+- State
+- Pincode
+
+### Products
 
 Stores:
 
-Product name
-Category
-Price
-Description
-Product image
-Orders
+- Product name
+- Category
+- Price
+- Description
+- Product image
+
+### Orders
 
 Stores:
 
-User
-Products
-Quantity
-Product price snapshot
-Total amount
-Payment method
-Shipping address
-Order status
-Creation date
-💳 Payment Disclaimer
+- User
+- Products
+- Quantity
+- Product price snapshot
+- Total amount
+- Payment method
+- Shipping address
+- Order status
+- Creation date
+
+---
+
+## 💳 Payment Disclaimer
 
 The payment system included in this project is a simulated payment gateway designed for academic demonstration.
 
 Supported payment methods:
 
-UPI
-Credit / Debit Card
-Cash on Delivery
+- UPI
+- Credit / Debit Card
+- Cash on Delivery
 
 No real payment transaction is performed.
 
 The application does not store:
 
-Card numbers
-CVV
-Card expiry details
-UPI credentials
+- Card numbers
+- CVV
+- Card expiry details
+- UPI credentials
 
 Only the selected payment method is stored with the order.
 
-🧾 Receipt System
+---
+
+## 🧾 Receipt System
 
 After an order is successfully created, users can download a PDF receipt.
 
 The receipt is generated using:
 
+```text
 jsPDF
+```
 
 The receipt is generated from the stored order information, ensuring that the receipt represents the order that was actually placed.
 
 Users can download receipts from:
 
+```text
 Order Confirmation
         │
         └── Download Receipt
@@ -432,8 +495,15 @@ My Account
         └── My Orders
                 │
                 └── Download Receipt
-📱 Main Routes
-Frontend Routes
+```
+
+---
+
+## 📱 Main Routes
+
+### Frontend Routes
+
+```text
 /                       Home
 /shop                   Product collection
 /about                  About SAURABHYA
@@ -444,7 +514,11 @@ Frontend Routes
 /account                User account
 /checkout               Checkout
 /order-confirmation     Order confirmation
-Backend API Routes
+```
+
+### Backend API Routes
+
+```text
 GET    /api/products
 GET    /api/products/:id
 POST   /api/products
@@ -456,25 +530,39 @@ PUT    /api/auth/profile
 
 POST   /api/orders
 GET    /api/orders/my-orders
-🎨 Design Philosophy
+```
+
+---
+
+## 🎨 Design Philosophy
 
 SAURABHYA follows a modern luxury visual direction inspired by contemporary Indian aesthetics.
 
 The design focuses on:
 
-Warm neutral tones
-Ivory and stone backgrounds
-Charcoal typography
-Elegant serif headings
-Generous whitespace
-Minimal layouts
-Editorial-style presentation
-Subtle Indian-inspired visual identity
+- Warm neutral tones
+- Ivory and stone backgrounds
+- Charcoal typography
+- Elegant serif headings
+- Generous whitespace
+- Minimal layouts
+- Editorial-style presentation
+- Subtle Indian-inspired visual identity
 
 The goal is to create an Indian-inspired fragrance brand without relying heavily on traditional visual elements.
 
-📌 Project Status
+---
 
-Completed — Web Programming Academic Project
+## 📌 Project Status
+
+**Completed — Web Programming Academic Project**
 
 SAURABHYA demonstrates a complete basic full-stack e-commerce workflow using the MERN stack, including authentication, product management, shopping cart functionality, account management, checkout, simulated payments, order management, and PDF receipt generation.
+
+---
+
+## 👨‍💻 Project
+
+**SAURABHYA — Where Memories Become Fragrance**
+
+A modern Indian-inspired perfume e-commerce experience built with the MERN stack.
