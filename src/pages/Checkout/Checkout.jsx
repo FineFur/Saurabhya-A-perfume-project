@@ -2,19 +2,13 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import CartContext from "../../context/CartContext";
+import AuthContext from "../../context/AuthContext";
 
 function Checkout() {
   const { cartItems, clearCart } = useContext(CartContext);
-  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
-  const [shipping, setShipping] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: "",
-  });
+  const navigate = useNavigate();
 
   const [paymentMethod, setPaymentMethod] = useState("UPI");
 
@@ -30,37 +24,6 @@ function Checkout() {
   const [submitError, setSubmitError] = useState("");
 
   // --------------------------------
-  // HANDLE SHIPPING INPUT
-  // --------------------------------
-
-  function handleShippingChange(event) {
-    const { name, value } = event.target;
-
-    let newValue = value;
-
-    // Phone: numbers only, maximum 10 digits
-    if (name === "phone") {
-      newValue = value.replace(/\D/g, "").slice(0, 10);
-    }
-
-    // Pincode: numbers only, maximum 6 digits
-    if (name === "pincode") {
-      newValue = value.replace(/\D/g, "").slice(0, 6);
-    }
-
-    setShipping((current) => ({
-      ...current,
-      [name]: newValue,
-    }));
-
-    // Remove error when user starts correcting the field
-    setErrors((current) => ({
-      ...current,
-      [name]: "",
-    }));
-  }
-
-  // --------------------------------
   // HANDLE PAYMENT INPUT
   // --------------------------------
 
@@ -69,12 +32,12 @@ function Checkout() {
 
     let newValue = value;
 
-    // Card number: numbers only, maximum 16 digits
+    // Card number: numbers only
     if (name === "cardNumber") {
       newValue = value.replace(/\D/g, "").slice(0, 16);
     }
 
-    // CVV: numbers only, maximum 3 digits
+    // CVV: numbers only
     if (name === "cvv") {
       newValue = value.replace(/\D/g, "").slice(0, 3);
     }
@@ -99,61 +62,24 @@ function Checkout() {
       ...current,
       [name]: "",
     }));
+
+    setSubmitError("");
   }
 
   // --------------------------------
-  // VALIDATE SHIPPING
+  // CHECK DELIVERY INFORMATION
   // --------------------------------
 
-  function validateShipping() {
-    const newErrors = {};
-
-    const name = shipping.name.trim();
-    const phone = shipping.phone.trim();
-    const address = shipping.address.trim();
-    const city = shipping.city.trim();
-    const state = shipping.state.trim();
-    const pincode = shipping.pincode.trim();
-
-    if (!name) {
-      newErrors.name = "Full name is required.";
-    } else if (name.length < 2) {
-      newErrors.name = "Name must contain at least 2 characters.";
-    } else if (!/^[a-zA-Z\s.'-]+$/.test(name)) {
-      newErrors.name = "Please enter a valid name.";
-    }
-
-    if (!phone) {
-      newErrors.phone = "Phone number is required.";
-    } else if (!/^[6-9]\d{9}$/.test(phone)) {
-      newErrors.phone = "Enter a valid 10-digit Indian mobile number.";
-    }
-
-    if (!address) {
-      newErrors.address = "Address is required.";
-    } else if (address.length < 10) {
-      newErrors.address = "Address must contain at least 10 characters.";
-    }
-
-    if (!city) {
-      newErrors.city = "City is required.";
-    } else if (!/^[a-zA-Z\s.'-]+$/.test(city)) {
-      newErrors.city = "Please enter a valid city.";
-    }
-
-    if (!state) {
-      newErrors.state = "State is required.";
-    } else if (!/^[a-zA-Z\s.'-]+$/.test(state)) {
-      newErrors.state = "Please enter a valid state.";
-    }
-
-    if (!pincode) {
-      newErrors.pincode = "Pincode is required.";
-    } else if (!/^\d{6}$/.test(pincode)) {
-      newErrors.pincode = "Pincode must contain exactly 6 digits.";
-    }
-
-    return newErrors;
+  function hasDeliveryInformation() {
+    return (
+      user &&
+      user.name &&
+      user.phone &&
+      user.address &&
+      user.city &&
+      user.state &&
+      user.pincode
+    );
   }
 
   // --------------------------------
@@ -178,12 +104,14 @@ function Checkout() {
       const expiry = payment.expiry;
       const cvv = payment.cvv;
 
+      // Card number
       if (!cardNumber) {
         newErrors.cardNumber = "Card number is required.";
       } else if (!/^\d{16}$/.test(cardNumber)) {
         newErrors.cardNumber = "Card number must contain exactly 16 digits.";
       }
 
+      // Expiry
       if (!expiry) {
         newErrors.expiry = "Expiry date is required.";
       } else if (!/^\d{2}\/\d{2}$/.test(expiry)) {
@@ -211,6 +139,7 @@ function Checkout() {
         }
       }
 
+      // CVV
       if (!cvv) {
         newErrors.cvv = "CVV is required.";
       } else if (!/^\d{3}$/.test(cvv)) {
@@ -230,24 +159,26 @@ function Checkout() {
 
     setSubmitError("");
 
-    // Cart validation
+    // Check cart
     if (cartItems.length === 0) {
       setSubmitError("Your cart is empty.");
       return;
     }
 
-    const shippingErrors = validateShipping();
+    // Check saved delivery information
+    if (!hasDeliveryInformation()) {
+      setSubmitError(
+        "Please add your delivery information from My Account before placing your order.",
+      );
+      return;
+    }
+
+    // Validate payment
     const paymentErrors = validatePayment();
 
-    const allErrors = {
-      ...shippingErrors,
-      ...paymentErrors,
-    };
+    setErrors(paymentErrors);
 
-    setErrors(allErrors);
-
-    // Stop if validation failed
-    if (Object.keys(allErrors).length > 0) {
+    if (Object.keys(paymentErrors).length > 0) {
       return;
     }
 
@@ -267,7 +198,17 @@ function Checkout() {
             product: item._id,
             quantity: item.quantity,
           })),
-          shippingAddress: shipping,
+
+          shippingAddress: {
+            name: user.name,
+            phone: user.phone,
+            address: user.address,
+            city: user.city,
+            state: user.state,
+            pincode: user.pincode,
+          },
+
+          paymentMethod,
         }),
       });
 
@@ -335,228 +276,145 @@ function Checkout() {
   return (
     <main className="mx-auto max-w-7xl px-6 py-16">
       <div className="grid gap-16 lg:grid-cols-[1.5fr_1fr]">
-
         {/* =========================
-            CHECKOUT FORM
+            CHECKOUT
         ========================== */}
 
         <form onSubmit={handleSubmit}>
+          {/* HEADING */}
+
           <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
             SAURABHYA
           </p>
 
-          <h1 className="mt-3 font-serif text-5xl text-stone-900">
-            Checkout
-          </h1>
+          <h1 className="mt-3 font-serif text-5xl text-stone-900">Checkout</h1>
 
-          {/* SHIPPING */}
+          {/* =========================
+              DELIVERY INFORMATION
+          ========================== */}
 
           <section className="mt-12">
-            <h2 className="font-serif text-2xl text-stone-900">
-              Shipping Information
-            </h2>
-
-            {/* NAME */}
-
-            <div className="mt-6">
-              <label className="text-sm text-stone-700">
-                Full Name
-              </label>
-
-              <input
-                type="text"
-                name="name"
-                value={shipping.name}
-                onChange={handleShippingChange}
-                placeholder="Your full name"
-                className={`mt-2 w-full border px-4 py-3 outline-none ${
-                  errors.name
-                    ? "border-red-400"
-                    : "border-stone-300 focus:border-stone-900"
-                }`}
-              />
-
-              {errors.name && (
-                <p className="mt-2 text-sm text-red-600">
-                  {errors.name}
-                </p>
-              )}
-            </div>
-
-            {/* PHONE */}
-
-            <div className="mt-5">
-              <label className="text-sm text-stone-700">
-                Phone Number
-              </label>
-
-              <input
-                type="tel"
-                name="phone"
-                value={shipping.phone}
-                onChange={handleShippingChange}
-                placeholder="10-digit mobile number"
-                inputMode="numeric"
-                className={`mt-2 w-full border px-4 py-3 outline-none ${
-                  errors.phone
-                    ? "border-red-400"
-                    : "border-stone-300 focus:border-stone-900"
-                }`}
-              />
-
-              {errors.phone && (
-                <p className="mt-2 text-sm text-red-600">
-                  {errors.phone}
-                </p>
-              )}
-            </div>
-
-            {/* ADDRESS */}
-
-            <div className="mt-5">
-              <label className="text-sm text-stone-700">
-                Address
-              </label>
-
-              <textarea
-                name="address"
-                value={shipping.address}
-                onChange={handleShippingChange}
-                placeholder="House / Flat, Street, Area"
-                rows="4"
-                className={`mt-2 w-full resize-none border px-4 py-3 outline-none ${
-                  errors.address
-                    ? "border-red-400"
-                    : "border-stone-300 focus:border-stone-900"
-                }`}
-              />
-
-              {errors.address && (
-                <p className="mt-2 text-sm text-red-600">
-                  {errors.address}
-                </p>
-              )}
-            </div>
-
-            {/* CITY + STATE */}
-
-            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <label className="text-sm text-stone-700">
-                  City
-                </label>
+                <h2 className="font-serif text-2xl text-stone-900">
+                  Delivery Information
+                </h2>
 
-                <input
-                  type="text"
-                  name="city"
-                  value={shipping.city}
-                  onChange={handleShippingChange}
-                  placeholder="City"
-                  className={`mt-2 w-full border px-4 py-3 outline-none ${
-                    errors.city
-                      ? "border-red-400"
-                      : "border-stone-300 focus:border-stone-900"
-                  }`}
-                />
-
-                {errors.city && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.city}
-                  </p>
-                )}
+                <p className="mt-2 text-sm text-stone-500">
+                  Your saved delivery details
+                </p>
               </div>
 
-              <div>
-                <label className="text-sm text-stone-700">
-                  State
-                </label>
-
-                <input
-                  type="text"
-                  name="state"
-                  value={shipping.state}
-                  onChange={handleShippingChange}
-                  placeholder="State"
-                  className={`mt-2 w-full border px-4 py-3 outline-none ${
-                    errors.state
-                      ? "border-red-400"
-                      : "border-stone-300 focus:border-stone-900"
-                  }`}
-                />
-
-                {errors.state && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.state}
-                  </p>
-                )}
-              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/account")}
+                className="whitespace-nowrap border-b border-stone-900 pb-1 text-xs uppercase tracking-[0.12em] text-stone-900 transition hover:text-stone-600"
+              >
+                Update Info
+              </button>
             </div>
 
-            {/* PINCODE */}
+            {/* SAVED DETAILS */}
 
-            <div className="mt-5">
-              <label className="text-sm text-stone-700">
-                Pincode
-              </label>
-
-              <input
-                type="text"
-                name="pincode"
-                value={shipping.pincode}
-                onChange={handleShippingChange}
-                placeholder="6-digit pincode"
-                inputMode="numeric"
-                className={`mt-2 w-full border px-4 py-3 outline-none ${
-                  errors.pincode
-                    ? "border-red-400"
-                    : "border-stone-300 focus:border-stone-900"
-                }`}
-              />
-
-              {errors.pincode && (
-                <p className="mt-2 text-sm text-red-600">
-                  {errors.pincode}
+            {hasDeliveryInformation() ? (
+              <div className="mt-6 border border-stone-200 bg-stone-50 p-6">
+                <p className="text-base font-medium text-stone-900">
+                  {user.name}
                 </p>
-              )}
-            </div>
+
+                <p className="mt-2 text-sm text-stone-700">{user.phone}</p>
+
+                <p className="mt-4 text-sm leading-6 text-stone-700">
+                  {user.address}
+                  <br />
+                  {user.city}, {user.state}
+                  <br />
+                  {user.pincode}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6 border border-red-200 bg-red-50 p-6">
+                <p className="text-sm leading-6 text-red-700">
+                  Your delivery information is incomplete. Please add it to your
+                  account before placing an order.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/account")}
+                  className="mt-4 bg-stone-900 px-5 py-3 text-xs uppercase tracking-[0.12em] text-white transition hover:bg-stone-700"
+                >
+                  Add Delivery Information
+                </button>
+              </div>
+            )}
           </section>
 
-          {/* PAYMENT */}
+          {/* =========================
+              PAYMENT
+          ========================== */}
 
           <section className="mt-14">
             <h2 className="font-serif text-2xl text-stone-900">
               Payment Method
             </h2>
 
+            {/* PAYMENT BUTTONS */}
+
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              {["UPI", "Card", "COD"].map((method) => (
-                <button
-                  key={method}
-                  type="button"
-                  onClick={() => {
-                    setPaymentMethod(method);
-                    setErrors({});
-                  }}
-                  className={`border px-4 py-4 text-sm transition ${
-                    paymentMethod === method
-                      ? "border-stone-900 bg-stone-900 text-white"
-                      : "border-stone-300 text-stone-700 hover:border-stone-500"
-                  }`}
-                >
-                  {method === "COD"
-                    ? "Cash on Delivery"
-                    : method}
-                </button>
-              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setPaymentMethod("UPI");
+                  setErrors({});
+                }}
+                className={`border px-4 py-4 text-sm transition ${
+                  paymentMethod === "UPI"
+                    ? "border-stone-900 bg-stone-900 text-white"
+                    : "border-stone-300 text-stone-700 hover:border-stone-500"
+                }`}
+              >
+                UPI
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setPaymentMethod("Card");
+                  setErrors({});
+                }}
+                className={`border px-4 py-4 text-sm transition ${
+                  paymentMethod === "Card"
+                    ? "border-stone-900 bg-stone-900 text-white"
+                    : "border-stone-300 text-stone-700 hover:border-stone-500"
+                }`}
+              >
+                Card
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setPaymentMethod("COD");
+                  setErrors({});
+                }}
+                className={`border px-4 py-4 text-sm transition ${
+                  paymentMethod === "COD"
+                    ? "border-stone-900 bg-stone-900 text-white"
+                    : "border-stone-300 text-stone-700 hover:border-stone-500"
+                }`}
+              >
+                Cash on Delivery
+              </button>
             </div>
 
-            {/* UPI */}
+            {/* =========================
+                UPI
+            ========================== */}
 
             {paymentMethod === "UPI" && (
               <div className="mt-6">
-                <label className="text-sm text-stone-700">
-                  UPI ID
-                </label>
+                <label className="text-sm text-stone-700">UPI ID</label>
 
                 <input
                   type="text"
@@ -572,9 +430,7 @@ function Checkout() {
                 />
 
                 {errors.upiId && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.upiId}
-                  </p>
+                  <p className="mt-2 text-sm text-red-600">{errors.upiId}</p>
                 )}
 
                 <p className="mt-2 text-xs text-stone-500">
@@ -583,14 +439,14 @@ function Checkout() {
               </div>
             )}
 
-            {/* CARD */}
+            {/* =========================
+                CARD
+            ========================== */}
 
             {paymentMethod === "Card" && (
               <div className="mt-6 space-y-5">
                 <div>
-                  <label className="text-sm text-stone-700">
-                    Card Number
-                  </label>
+                  <label className="text-sm text-stone-700">Card Number</label>
 
                   <input
                     type="text"
@@ -615,9 +471,7 @@ function Checkout() {
 
                 <div className="grid grid-cols-2 gap-5">
                   <div>
-                    <label className="text-sm text-stone-700">
-                      Expiry
-                    </label>
+                    <label className="text-sm text-stone-700">Expiry</label>
 
                     <input
                       type="text"
@@ -641,9 +495,7 @@ function Checkout() {
                   </div>
 
                   <div>
-                    <label className="text-sm text-stone-700">
-                      CVV
-                    </label>
+                    <label className="text-sm text-stone-700">CVV</label>
 
                     <input
                       type="password"
@@ -661,9 +513,7 @@ function Checkout() {
                     />
 
                     {errors.cvv && (
-                      <p className="mt-2 text-sm text-red-600">
-                        {errors.cvv}
-                      </p>
+                      <p className="mt-2 text-sm text-red-600">{errors.cvv}</p>
                     )}
                   </div>
                 </div>
@@ -674,7 +524,9 @@ function Checkout() {
               </div>
             )}
 
-            {/* COD */}
+            {/* =========================
+                COD
+            ========================== */}
 
             {paymentMethod === "COD" && (
               <p className="mt-6 text-sm leading-6 text-stone-600">
@@ -683,7 +535,9 @@ function Checkout() {
             )}
           </section>
 
-          {/* SUBMIT ERROR */}
+          {/* =========================
+              ERROR
+          ========================== */}
 
           {submitError && (
             <div className="mt-8 border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
@@ -691,7 +545,9 @@ function Checkout() {
             </div>
           )}
 
-          {/* SUBMIT */}
+          {/* =========================
+              SUBMIT
+          ========================== */}
 
           <button
             type="submit"
@@ -741,10 +597,7 @@ function Checkout() {
                   </p>
 
                   <p className="mt-2 text-sm text-stone-700">
-                    ₹
-                    {(item.price * item.quantity).toLocaleString(
-                      "en-IN",
-                    )}
+                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                   </p>
                 </div>
               </div>

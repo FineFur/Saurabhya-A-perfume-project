@@ -63,12 +63,12 @@ function Navbar() {
         {/* RIGHT */}
         <div className="flex items-center justify-end gap-5">
           {/* SEARCH */}
-          <button
+          {/* <button
             type="button"
             className="text-base text-stone-700 transition hover:text-stone-900"
           >
             Search
-          </button>
+          </button> */}
 
           {/* ACCOUNT */}
           {user ? (

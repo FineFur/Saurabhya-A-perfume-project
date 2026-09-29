@@ -121,8 +121,91 @@ router.get("/me", protect, (req, res) => {
       id: req.user._id,
       name: req.user.name,
       email: req.user.email,
+      phone: req.user.phone,
+      address: req.user.address,
+      city: req.user.city,
+      state: req.user.state,
+      pincode: req.user.pincode,
     },
   });
+});
+
+// Update current user's profile and delivery information
+router.put("/profile", protect, async (req, res) => {
+  try {
+    const {
+      name,
+      phone,
+      address,
+      city,
+      state,
+      pincode,
+    } = req.body;
+
+    // Basic validation
+    if (
+      !name ||
+      !phone ||
+      !address ||
+      !city ||
+      !state ||
+      !pincode
+    ) {
+      return res.status(400).json({
+        message: "Please provide all profile and delivery details.",
+      });
+    }
+
+    // Validate phone
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      return res.status(400).json({
+        message: "Please provide a valid 10-digit phone number.",
+      });
+    }
+
+    // Validate pincode
+    if (!/^\d{6}$/.test(pincode)) {
+      return res.status(400).json({
+        message: "Please provide a valid 6-digit pincode.",
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    user.name = name.trim();
+    user.phone = phone.trim();
+    user.address = address.trim();
+    user.city = city.trim();
+    user.state = state.trim();
+    user.pincode = pincode.trim();
+
+    await user.save();
+
+    res.json({
+      message: "Profile updated successfully.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
+        state: user.state,
+        pincode: user.pincode,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Unable to update profile.",
+      error: error.message,
+    });
+  }
 });
 
 module.exports = router;

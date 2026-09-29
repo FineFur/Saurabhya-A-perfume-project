@@ -43,6 +43,13 @@ const orderSchema = new mongoose.Schema(
       min: 0,
     },
 
+    // Payment method used for the order
+    paymentMethod: {
+      type: String,
+      enum: ["UPI", "Card", "COD"],
+      required: true,
+    },
+
     // Shipping information
     shippingAddress: {
       name: {
@@ -79,19 +86,13 @@ const orderSchema = new mongoose.Schema(
     // Current state of the order
     status: {
       type: String,
-      enum: [
-        "Placed",
-        "Processing",
-        "Shipped",
-        "Delivered",
-        "Cancelled",
-      ],
+      enum: ["Placed", "Processing", "Shipped", "Delivered", "Cancelled"],
       default: "Placed",
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Order = mongoose.model("Order", orderSchema);

@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -54,6 +54,11 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
+  // Update user information in React
+  function updateUser(userData) {
+    setUser(userData);
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -61,6 +66,7 @@ export function AuthProvider({ children }) {
         loading,
         login,
         logout,
+        updateUser,
       }}
     >
       {children}

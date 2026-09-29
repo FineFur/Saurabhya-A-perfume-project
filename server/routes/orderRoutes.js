@@ -9,7 +9,7 @@ const router = express.Router();
 // Create a new order
 router.post("/", protect, async (req, res) => {
   try {
-    const { items, shippingAddress } = req.body;
+    const { items, shippingAddress, paymentMethod } = req.body;
 
     // Check that cart items were provided
     if (!items || items.length === 0) {
@@ -22,6 +22,19 @@ router.post("/", protect, async (req, res) => {
     if (!shippingAddress) {
       return res.status(400).json({
         message: "Please provide shipping information",
+      });
+    }
+
+    // Check payment method
+    if (!paymentMethod) {
+      return res.status(400).json({
+        message: "Please provide a payment method",
+      });
+    }
+
+    if (!["UPI", "Card", "COD"].includes(paymentMethod)) {
+      return res.status(400).json({
+        message: "Invalid payment method",
       });
     }
 
@@ -43,7 +56,7 @@ router.post("/", protect, async (req, res) => {
     // Build the order items using database prices
     const orderItems = items.map((item) => {
       const product = products.find(
-        (product) => product._id.toString() === item.product
+        (product) => product._id.toString() === item.product,
       );
 
       if (!product) {
@@ -65,18 +78,16 @@ router.post("/", protect, async (req, res) => {
     });
 
     // Calculate the total using MongoDB product prices
-    const totalAmount = orderItems.reduce(
-      (total, item) => {
-        return total + item.price * item.quantity;
-      },
-      0
-    );
+    const totalAmount = orderItems.reduce((total, item) => {
+      return total + item.price * item.quantity;
+    }, 0);
 
     // Create the order
     const order = await Order.create({
       user: req.user._id,
       items: orderItems,
       totalAmount,
+      paymentMethod,
       shippingAddress,
     });
 
